@@ -1,0 +1,68 @@
+{
+  "$comment": "公众诉求模块发布前检查清单。这是检查步骤的唯一维护处：新增/调整步骤只改这里，runner/Makefile/README 都不另列步骤。",
+  "module": "公众诉求（complaint）",
+  "backend": {
+    "dir": "backend",
+    "requirements": "backend/requirements.txt",
+    "dockerfile": "backend/Dockerfile",
+    "compose_service": "backend",
+    "app": "app.main:app",
+    "required_env": {
+      "backend": ["APP_ENV"]
+    }
+  },
+  "frontend": {
+    "dir": "frontend",
+    "dockerfile": "frontend/Dockerfile",
+    "compose_service": "frontend"
+  },
+  "compose_file": "docker-compose.yml",
+  "env_example": ".env.example",
+  "ports": [
+    {"service": "backend", "host": 8000, "container": 8000},
+    {"service": "frontend", "host": 5173, "container": 5173}
+  ],
+  "complaint": {
+    "ledger": "backend/data/complaints.ledger.json",
+    "required_fields": ["采集时间", "诉求来源", "诉求内容"],
+    "workflow_status": ["待受理", "办理中", "已回复", "已关闭"],
+    "allowed_status": ["待受理", "办理中", "已回复", "已关闭", "已完成"],
+    "terminal_status": ["已关闭", "已完成"],
+    "code_prefix": "COMP",
+    "list_path": "/api/complaint",
+    "export_path": "/api/complaint/export",
+    "health_path": "/api/health"
+  },
+  "steps": [
+    {
+      "id": "deps",
+      "name": "核对后端依赖版本",
+      "handler": "check_deps",
+      "inputs": ["backend/requirements.txt"]
+    },
+    {
+      "id": "seed",
+      "name": "按采集顺序回填诉求示例数据",
+      "handler": "check_seed",
+      "inputs": ["backend/data/complaints.ledger.json"]
+    },
+    {
+      "id": "ports",
+      "name": "核对容器端口",
+      "handler": "check_ports",
+      "inputs": ["docker-compose.yml", "backend/Dockerfile", "frontend/Dockerfile"]
+    },
+    {
+      "id": "env",
+      "name": "核对环境变量",
+      "handler": "check_env",
+      "inputs": ["docker-compose.yml", ".env.example"]
+    },
+    {
+      "id": "api",
+      "name": "起服务并核对诉求条数与台账一致",
+      "handler": "check_api",
+      "inputs": ["backend/app"]
+    }
+  ]
+}

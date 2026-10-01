@@ -85,3 +85,6 @@ desktop.ini
 *.db
 *.pid
 *.seed
+
+# ===== 发布前检查流程的中间产物与戳 =====
+.release-check/

@@ -74,3 +74,25 @@ npm run dev
   `backend/app/routers/<模块>.py`，业务规则在 `backend/app/services/<模块>.py`。
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
+
+## 公众诉求发布前检查
+
+发布前不再人工逐项核对，统一跑一条流程（步骤只以
+`release-check/manifest.json` 这一处清单为准，新增/调整检查只改这个文件）：
+
+```bash
+make preflight          # 断点续跑：从上次失败或输入发生变化的步骤继续
+make preflight-fresh    # 清掉全部中间产物后从头跑
+make preflight-list     # 查看清单中的步骤
+```
+
+流程依次完成：核对 `backend/requirements.txt` 与虚拟环境中的依赖版本、按采集顺序
+把诉求台账回填成示例数据、核对 compose 端口映射与 Dockerfile `EXPOSE`、核对环境变量
+在 compose 与 `.env.example` 中都已声明、启动后端核对诉求列表/导出接口的条数与台账一致
+（含采集顺序与各状态筛选口径）。
+
+- 哪一步没过会直接打印步骤名与具体原因，详细日志在 `.release-check/steps/<步骤>.log`。
+- 修好后重新 `make preflight` 即可，已通过且输入未变的步骤自动跳过；
+  中间产物全部隔离在 `.release-check/`（已 gitignore），不会污染下一次运行。
+- 诉求台账是 `backend/data/complaints.ledger.json`，条数核对只以这份台账为准。
+
