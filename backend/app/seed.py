@@ -1,4 +1,9 @@
-"""示例数据：每个模块给几条不同状态的记录，方便起服务后立刻看到内容。"""
+"""示例数据：每个模块给几条不同状态的记录，方便起服务后立刻看到内容。
+
+公众诉求的示例数据不在本文件里维护：它是发布前从存量诉求台账
+（release-check/manifest.toml）按采集顺序回填生成的，见
+app/seed_complaint_generated.py 与 release-check/preflight.py。
+"""
 from __future__ import annotations
 
 from typing import Any
@@ -653,3 +658,13 @@ SEED_ROWS: dict[str, list[dict[str, Any]]] = {
   '归档日期': '2026-09-03',
   '档案状态': '管网档案样例3'}]
 }
+
+# 公众诉求示例数据：由发布前检查流水线按台账回填生成，存在即覆盖上面的占位数据。
+# 文件不提交为手工维护内容，生成逻辑见 release-check/preflight.py 的 seed 步骤。
+try:
+    from app.seed_complaint_generated import COMPLAINT_SEED_ROWS as _COMPLAINT_SEED_ROWS
+
+    SEED_ROWS["complaint"] = _COMPLAINT_SEED_ROWS
+except ImportError:
+    # 首次克隆、还没跑过流水线时，保留占位数据，服务仍可启动
+    pass

@@ -85,3 +85,8 @@ desktop.ini
 *.db
 *.pid
 *.seed
+
+# ===== 发布前检查流水线的中间产物与回填生成文件 =====
+# 这些都由 release-check/preflight.py 生成，源头是 release-check/manifest.toml
+.release/
+backend/app/seed_complaint_generated.py
